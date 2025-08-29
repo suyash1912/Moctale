@@ -47,16 +47,16 @@ Both files must be in the same directory as the app scripts for proper functiona
 ###  Prerequisites
 - Python **3.7+**
 
-### 🔧 Steps
+###  Steps
 
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/your-username/Moctale.git
    cd Moctale
 2. **Install Required Packages**
-Run the ML Model Training
-    pip install -r requirements.txt
-
+  ```bash
+   pip install -r requirements.txt
+ ```
 3. **Obtain a TMDB API Key**
 
   Create a free account at TMDB.
@@ -67,14 +67,16 @@ Run the ML Model Training
    Inside your project folder, create:
    .streamlit/secrets.toml
 
-   Add your API key:
-   ```bash
-   TMDB_API_KEY = "YOUR_API_KEY_HERE"
-    ```
+Add your API key:
+```bash
+TMDB_API_KEY = "YOUR_API_KEY_HERE"
+ ```
 5. **Run the streamlit server**
-  ```bash
- streamlit run app.py
-  ```
+```bash
+streamlit run app.py
+ ```
+---
+
 **Contributing**
 
 Contributions are welcome! 🎉
