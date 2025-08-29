@@ -17,7 +17,7 @@ It offers multiple recommendation strategies, from simple content-based filterin
 
 ---
 
-## ⚙ How It Works
+##  How It Works
 
 The system runs on two main scripts:
 
