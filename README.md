@@ -55,22 +55,23 @@ Both files must be in the same directory as the app scripts for proper functiona
 ###  Steps
 
 1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/your-username/Moctale.git
-   cd Moctale
+```bash
+ git clone https://github.com/your-username/Moctale.git
+ cd Moctale
+```
 2. **Install Required Packages**
-  ```bash
-   pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
  ```
 3. **Obtain a TMDB API Key**
 
-  Create a free account at TMDB.
-  Go to Settings → API and generate a new API key.
+Create a free account at TMDB.
+Go to Settings → API and generate a new API key.
   
 4. **Create secrets.toml**
 
-   Inside your project folder, create:
-   .streamlit/secrets.toml
+Inside your project folder, create:
+.streamlit/secrets.toml
 
 Add your API key:
 ```bash
