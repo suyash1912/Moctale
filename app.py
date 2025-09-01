@@ -225,18 +225,18 @@ def process_features(_movies_df):
 def build_tfidf_index(tags):
     """Fit a sparse TF-IDF index for tags and return vectorizer and matrix."""
     tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
-    vectors = tfidf.fit_transform(tags)  # keep sparse
+    vectors = tfidf.fit_transform(tags) 
     return tfidf, vectors
 
 def recommend(movie, movies_df, vectors, num_recommendations=10):
     try:
         movie_index_label = movies_df[movies_df['title'] == movie].index[0]
         movie_positional_index = movies_df.index.get_loc(movie_index_label)
-        # Compute cosine similarity for the selected item against all others on demand
+        
         distances = cosine_similarity(vectors[movie_positional_index], vectors).ravel()
-        # Exclude the movie itself and take top N
+   
         top_idx = np.argpartition(-distances, range(1, num_recommendations + 1))[1:num_recommendations + 1]
-        # Sort the selected top indices by actual score descending
+       
         top_idx = top_idx[np.argsort(-distances[top_idx])]
         recommended_movies = []
         for idx in top_idx:
@@ -245,7 +245,7 @@ def recommend(movie, movies_df, vectors, num_recommendations=10):
             year = movies_df.iloc[idx].release_year
             genres = movies_df.iloc[idx].genres_str
             poster_url = fetch_poster(movie_id)
-            # Build a brief explanation: top overlapping words between tags
+            
             try:
                 base_tokens = set(str(movies_df.loc[movie_index_label, 'tags']).split())
                 rec_tokens = set(str(movies_df.iloc[idx].tags).split())
@@ -261,7 +261,7 @@ def recommend(movie, movies_df, vectors, num_recommendations=10):
 def build_query_vector(selected_titles, query_text, movies_df, tfidf, vectors):
     """Create a query vector from selected movies and optional text (keywords/people)."""
     parts = []
-    # Seed by selected movies
+   
     if selected_titles:
         idxs = []
         for t in selected_titles:
@@ -272,7 +272,7 @@ def build_query_vector(selected_titles, query_text, movies_df, tfidf, vectors):
                 pass
         if idxs:
             seed_vec = vectors[idxs].mean(axis=0)
-            # ensure sparse CSR matrix
+            
             if not sp.issparse(seed_vec):
                 seed_vec = sp.csr_matrix(seed_vec)
             else:
@@ -284,7 +284,7 @@ def build_query_vector(selected_titles, query_text, movies_df, tfidf, vectors):
         parts.append(q_vec)
     if not parts:
         return None
-    # Average all parts (keep sparse)
+   
     mixed = parts[0]
     for p in parts[1:]:
         mixed = mixed + p
@@ -304,7 +304,7 @@ def recommend_hybrid(selected_titles, movies_df, tfidf, vectors, num_recommendat
     rating = movies_df['rating_norm'].values
     pop = movies_df['popularity_norm'].values
     final_score = ws * sim + wr * rating + wp * pop
-    # Exclude any selected items from results
+  
     exclude_idx = set()
     for t in selected_titles:
         try:
@@ -315,7 +315,7 @@ def recommend_hybrid(selected_titles, movies_df, tfidf, vectors, num_recommendat
     order = np.argsort(-final_score)
     ranked = [i for i in order if i not in exclude_idx][:num_recommendations]
     recs = []
-    # For overlap explanation, if a single seed is chosen, use it; else use top tokens from query
+    
     base_tokens = set()
     if len(selected_titles) == 1:
         try:
@@ -340,7 +340,7 @@ def recommend_hybrid(selected_titles, movies_df, tfidf, vectors, num_recommendat
         recs.append({'id': movie_id, 'title': title, 'year': year, 'genres': genres, 'poster': poster_url, 'why': why})
     return recs
 
-# --- ML Model Integration ---
+
 def rerank_with_ml(recommendations):
     try:
         clf = joblib.load("ml_model.pkl")
@@ -361,21 +361,21 @@ def rerank_with_ml(recommendations):
     return [m for m, _ in ranked]
 
 
-# --- Main Application ---
+
 def main():
     with st.sidebar:
         st.title("🎬 Moctale")
         st.subheader("Classic Movies Recommender")
         st.markdown("Discover timeless classics tailored to your taste.")
         
-        # Sidebar options
+       
         st.markdown("---")
         algo_choice = st.radio("Recommendation Mode", ["Content-Based", "ML Enhanced", "Hybrid (Beast Mode)"])
         num_recs = st.slider("Number of recommendations", min_value=5, max_value=20, value=10, step=1)
-        # Decade filter
+        
         decade_options = ["All", "1920s", "1930s", "1940s", "1950s", "1960s", "1970s", "1980s", "1990s"]
         selected_decade = st.selectbox("Filter by decade", options=decade_options, index=0)
-        # Hybrid controls
+        
         preset = st.selectbox("Discovery preset", ["Custom", "Hidden gems", "Critically acclaimed", "Popular"], index=0)
         weight_sim = st.slider("Weight: Similarity", 0.0, 1.0, 0.6, 0.05)
         weight_rating = st.slider("Weight: Rating", 0.0, 1.0, 0.3, 0.05)
@@ -389,8 +389,7 @@ def main():
         st.markdown("---")
         with st.expander("ℹ️ About"):
             st.markdown("""
-            **How it works:**  
-            - *Content-Based*: Uses movie metadata (genres, cast, overview) and cosine similarity.  
+            **How it works:** - *Content-Based*: Uses movie metadata (genres, cast, overview) and cosine similarity.  
             - *ML Enhanced*: Re-ranks results with a trained RandomForest model.  
             """)
         with st.expander("👨‍💻 Credits"):
@@ -399,13 +398,13 @@ def main():
     st.title("Moctale - Classic Movies Recommender System")
     st.markdown("<p>Find your next favorite classic film!</p>", unsafe_allow_html=True)
 
-    # Watermark at bottom of main screen
+    
     st.markdown('<div class="watermark">Developed & Maintained by Suyash Mukherjee</div>', unsafe_allow_html=True)
 
     movies_data = load_and_prepare_data()
     if movies_data is not None:
         processed_movies = process_features(movies_data)
-        # Apply decade filter before building vectors
+       
         if selected_decade != "All":
             decade_start = int(selected_decade[:4])
             decade_end = decade_start + 9
@@ -414,7 +413,7 @@ def main():
             ]
         tfidf, vectors = build_tfidf_index(processed_movies['tags'])
 
-        # Dataset Insights
+        
         with st.expander("📊 Dataset Insights", expanded=False):
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -447,7 +446,7 @@ def main():
                 if algo_choice == "Hybrid (Beast Mode)":
                     recommendations = recommend_hybrid(selected_movies, processed_movies, tfidf, vectors, num_recommendations=num_recs, query_text=query_keywords, weight_sim=weight_sim, weight_rating=weight_rating, weight_pop=weight_pop)
                 else:
-                    # Fall back to single-seed content-based using first selection
+                    
                     seed_title = selected_movies[0] if selected_movies else None
                     recommendations = recommend(seed_title, processed_movies, vectors, num_recommendations=num_recs) if seed_title else []
                 if algo_choice == "ML Enhanced":
